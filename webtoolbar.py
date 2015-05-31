@@ -286,6 +286,8 @@ class PrimaryToolbar(ToolbarBase):
         'set-home': (GObject.SignalFlags.RUN_FIRST, None, ([])),
         'reset-home': (GObject.SignalFlags.RUN_FIRST, None, ([])),
         'go-library': (GObject.SignalFlags.RUN_FIRST, None, ([])),
+        'go-to-JSshell': (GObject.SignalFlags.RUN_FIRST, None, ([])),
+        'get-shell-input': (GObject.SignalFlags.RUN_FIRST, None, ([])),
     }
 
     def __init__(self, tabbed_view, act):
@@ -403,7 +405,21 @@ class PrimaryToolbar(ToolbarBase):
         self._toolbar_separator.props.draw = False
         self._toolbar_separator.set_expand(True)
 
-        stop_button = StopButton(self._activity)
+        self._go_to_JSshell = ToolButton('go-to-JSshell')
+        self._go_to_JSshell.set_tooltip(_('Go to Interactive Javascript Shell'))
+        self._go_to_JSshell.connect('clicked', self._go_to_JSshell_cb) 
+        #adding a button for the Interactive Javascript shell
+        toolbar.insert(self._go_to_JSshell, -1)
+        self._go_to_JSshell.show()
+
+        self._get_shell_input = ToolButton('get-shell-input')
+        self._get_shell_input.set_tooltip(_('Get Interactive Javascript Shell Input'))
+        self._get_shell_input.connect('clicked', self._get_shell_input_cb)
+        #adding a button for the Interactive Javascript shell
+        toolbar.insert(self._get_shell_input, -1)
+        self._get_shell_input.show()
+
+	stop_button = StopButton(self._activity)
         toolbar.insert(stop_button, -1)
 
         self._progress_listener = None
@@ -613,6 +629,12 @@ class PrimaryToolbar(ToolbarBase):
     def _reset_home_cb(self, button):
         self._reset_home_menu.set_visible(False)
         self.emit('reset-home')
+	
+    def _go_to_JSshell_cb(self, button):
+        self.emit('go-to-JSshell')
+
+    def _get_shell_input_cb(self, button):
+        self.emit('get-shell-input')
 
     def _go_back_cb(self, button):
         self._browser.go_back()

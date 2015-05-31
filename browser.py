@@ -340,6 +340,36 @@ class TabbedView(BrowserNotebook):
             browser.load_uri('file://' + default_page)
         browser.grab_focus()
 
+    def load_JSshell(self):
+        browser = self.current_browser
+        page = os.path.join(activity.get_bundle_path(),
+                            "data/Interactive_Javascript_Shell2.html")
+        new_browser = self.add_tab(next_to_current=True)
+        new_browser.load_uri('file://' + page)
+        new_browser.grab_focus()
+        #self.set_label('With')
+        #self._label = Gtk.Label(label=_('Wither'))
+        
+        self._label.set_text(_('Untit'))
+        self._title = _('Untit')
+        #new_browser.connect('notify::title', self.__title_changed_cb)
+        #new_browser.connect('notify::title', self.__title_changed_cb)
+        #self._label.set_text(_('Wither'))
+        #self._title = _('Wither')
+        
+        #self._label = Gtk.Label(label=self._title)
+        #self._label.set_ellipsize(Pango.EllipsizeMode.END)
+        #self._label.set_alignment(0, 0.5)
+        #self.pack_start(self._label, True, True, 0)
+        #self._label.show()
+        #self._label.set_text(_('Wither'))
+ 
+        #label = TabLabel(new_browser)
+        #label.connect('tab-close', self.__tab_close_cb, tab_page)
+        #label.show()
+  
+       
+
     def set_homepage(self):
         uri = self.current_browser.get_uri()
         client = GConf.Client.get_default()
@@ -447,7 +477,6 @@ class TabLabel(Gtk.HBox):
 
         browser.connect('notify::title', self.__title_changed_cb)
         browser.connect('notify::load-status', self.__load_status_changed_cb)
-
         self._title = _('Untitled')
         self._label = Gtk.Label(label=self._title)
         self._label.set_ellipsize(Pango.EllipsizeMode.END)

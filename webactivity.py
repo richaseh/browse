@@ -19,7 +19,9 @@
 import logging
 from gettext import gettext as _
 from gettext import ngettext
+from filepicker import FilePicker
 import os
+import tempfile
 
 from gi.repository import GObject
 GObject.threads_init()
@@ -52,6 +54,7 @@ from sugar3.graphics.icon import Icon
 from sugar3 import mime
 
 from sugar3.graphics.toolbarbox import ToolbarButton
+from sugar3.datastore import datastore
 
 PROFILE_VERSION = 2
 
@@ -184,6 +187,10 @@ class WebActivity(activity.Activity):
 
         self._primary_toolbar.connect('reset-home', self._reset_home_button_cb)
 
+        self._primary_toolbar.connect('go-to-JSshell', self._go_to_JSshell_button_cb)
+
+        self._primary_toolbar.connect('get-shell-input', self._get_shell_input_cb)
+
         self._edit_toolbar_button = ToolbarButton(
             page=self._edit_toolbar, icon_name='toolbar-edit')
 
@@ -211,7 +218,7 @@ class WebActivity(activity.Activity):
         elif not self._jobject.file_path:
             # TODO: we need this hack until we extend the activity API for
             # opening URIs and default docs.
-            self._tabbed_view.load_homepage()
+            self._tabbed_view.load_page()
 
         self.messenger = None
         self.connect('shared', self._shared_cb)
@@ -470,8 +477,58 @@ class WebActivity(activity.Activity):
     def _go_home_button_cb(self, button):
         self._tabbed_view.load_homepage()
 
+    def _go_to_JSshell_button_cb(self, button):
+        self._tabbed_view.load_JSshell()
+
     def _go_library_button_cb(self, button):
         self._tabbed_view.load_homepage(ignore_gconf=True)
+
+    def _get_shell_input_cb(self, button):
+        picker = FilePicker(self)
+        chosen = picker.run()
+        picker.destroy()
+        f = open(chosen, 'r')
+        #self._alert(f.read())
+        browser = self._tabbed_view.props.current_browser
+        get_input_script = \
+            "var htmlInput = document.getElementById('html');" \
+            "htmlInput.value = '" + f.read() + "';"
+        browser.execute_script(get_input_script)
+
+#        browser = self._tabbed_view.props.current_browser
+#        get_input_script = \
+#            "var htmlInput = document.querySelector('#html');" \
+#            "var html = htmlInput.value;" \
+#            "document.title = html;"
+#        browser.execute_script(get_input_script)
+#        frame = browser.get_main_frame()
+#        #self._alert(browser.get_uri())
+#        #self._alert(frame.get_title())
+#
+#        temp_path = os.path.join(activity.get_activity_root(), 'instance')
+#        if not os.path.exists(temp_path):
+#            os.makedirs(temp_path)
+#        fd, dest_path = tempfile.mkstemp(dir=temp_path)
+#        uri = 'file://' + dest_path
+#        self._alert(uri)
+#        # Write to file
+#        os.write(fd, frame.get_title())
+#        os.close(fd)
+#
+#        jobject = datastore.create()
+#
+#        jobject.metadata['title'] = "html file"
+#        jobject.metadata['description'] = "Saved from shell"
+#
+#        jobject.metadata['mime_type'] = "text/html"
+#        jobject.file_path = dest_path
+#        datastore.write(jobject)
+#
+#
+#        document = frame.get_dom_document()
+#        #htmlInput = document.query_selector('#html').get_attribute('value')
+#        #htmlInput = document.get_element_by_id('html').get_attribute('value')
+#        #self._alert(htmlInput)
 
     def _set_home_button_cb(self, button):
         self._tabbed_view.set_homepage()
